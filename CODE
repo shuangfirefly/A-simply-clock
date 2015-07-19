@@ -1,0 +1,119 @@
+import pygame, sys, time, math
+from pygame.locals import *
+
+pygame.init()
+
+#set title and size
+DISPLAYSURF = pygame.display.set_mode((200,200))
+
+#set color of the clock
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+
+
+#calculate the coordinate
+
+#calculate_angle
+def __calculate_angle(angle):
+    if 0 <= angle <= 90:
+        return angle
+    elif 90 < angle <= 180:
+        return angle - 90
+    elif 180 < angle <= 270:
+        return angle - 180
+    elif 270 < angle <= 360:
+        return angle - 270
+
+
+def clock_directing_calculate(W_watch_hands, length_watch_hands, get_number, coordinate_start_X, coordinate_start_Y):
+    if W_watch_hands == 'hour':
+        original_angle = 30
+        accurate = minute
+        angle = original_angle * get_number + 0.5 * accurate
+    elif W_watch_hands == 'minute' or W_watch_hands == 'second':
+        original_angle = 6
+        angle = original_angle * get_number
+    timing_used = __calculate_angle(angle)
+    radian = (timing_used * math.pi) / 180
+    if (0 <= angle <= 90) or (180 < angle <= 270):
+        coordinate_X_displacement = length_watch_hands * abs(math.sin(radian))
+        coordinate_Y_displacement = length_watch_hands * abs(math.cos(radian))
+        if (0 <= angle <= 90):
+            coordinate_last_X = coordinate_start_X + coordinate_X_displacement
+            coordinate_last_Y = coordinate_start_Y + (length_watch_hands - coordinate_Y_displacement)
+        if (180 < angle <= 270):
+            coordinate_last_X = coordinate_start_X - coordinate_X_displacement
+            coordinate_last_Y = coordinate_start_Y + length_watch_hands + coordinate_Y_displacement
+
+    elif (90 < angle <= 180) or (270 < angle <= 360):
+        coordinate_X_displacement = length_watch_hands * abs(math.cos(radian))
+        coordinate_Y_displacement = length_watch_hands * abs(math.sin(radian))
+        if 90 < angle <= 180:
+            coordinate_last_X = coordinate_start_X + coordinate_X_displacement
+            coordinate_last_Y = coordinate_start_Y + length_watch_hands + coordinate_Y_displacement
+        if   270 < angle <= 360:
+            coordinate_last_X = coordinate_start_X - coordinate_X_displacement
+            coordinate_last_Y = coordinate_start_Y + (length_watch_hands - coordinate_Y_displacement)
+    return coordinate_last_X, coordinate_last_Y
+            
+#set line function
+def line_drawing(W_watch_hands, lenght, weight, time_parameter):
+    if W_watch_hands == 'hour':
+        if time_parameter >= 12:
+            time_parameter = time_parameter - 12
+        elif time_parameter == 0:
+            pass
+    if W_watch_hands == 'minute' or W_watch_hands == 'second':
+        pass
+    coordinate_end_X, coordinate_end_Y = clock_directing_calculate(W_watch_hands, lenght, time_parameter, 100, 100-lenght)
+    pygame.draw.line(DISPLAYSURF, BLUE, (100, 100), (coordinate_end_X, coordinate_end_Y), weight)
+    
+
+
+ 
+while True:
+    DISPLAYSURF.fill(WHITE)
+
+    #draw elemets of the clock
+
+    #draw circle
+    pygame.draw.circle(DISPLAYSURF, BLUE, (100, 100), 90, 2)
+    pygame.draw.line(DISPLAYSURF, BLUE, (100, 10), (100, 17), 4)
+    pygame.draw.line(DISPLAYSURF, BLUE, (100, 190), (100, 183), 4)
+    pygame.draw.line(DISPLAYSURF, BLUE, (10, 100), (17, 100), 4)
+    pygame.draw.line(DISPLAYSURF, BLUE, (190, 100), (183, 100), 4)
+    pygame.draw.line(DISPLAYSURF, BLUE, (145.0, 22.05771365940052), (141.5, 28.119891485891586), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (177.94228634059948, 54.99999999), (171.8801085141084, 58.4999999), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (177.94228634059948, 145.0), (171.88010851410843, 141.5), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (145.0, 177.94228634059948), (141.5, 171.88010851410843), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (55.0000, 177.94228634059948), (58.5000, 171.88010851410843), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (22.05771365940052, 145.0), (28.1198914858916, 141.5), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (22.05771365940052, 55.0000), (28.119891485891586, 58.50000), 3)
+    pygame.draw.line(DISPLAYSURF, BLUE, (54.999999999, 22.05771365940052), (58.499999, 28.1198914858916), 3)
+    
+
+    #draw point
+    pixObj = pygame.PixelArray(DISPLAYSURF)
+    pixObj[99][100] = BLACK
+    pixObj[100][100] =BLACK
+    pixObj[101][100] = BLACK
+    pixObj[100][99] = BLACK
+    pixObj[100][101] = BLACK
+    del pixObj
+
+    #draw watch time
+    get_time = list(time.localtime())
+    hour = get_time[3]
+    minute = get_time[4]
+    second = get_time[5]
+    pygame.display.set_caption(str(hour) + ':' + str(minute) + ':' + str(second))
+    line_drawing('hour', 55, 5, hour)
+    line_drawing('minute', 70, 3, minute)
+    line_drawing('second', 80, 1, second)
+    
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+    pygame.display.update()
